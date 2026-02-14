@@ -23,13 +23,15 @@ cd PyImageDL
 
 ### 2. Create a Virtual Environment
 
-#### On Windows:
+#### On Windows
+
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-#### On macOS/Linux:
+#### On macOS/Linux
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -52,26 +54,31 @@ python main.py <url> <file_extension> [options]
 ### Quick Examples
 
 **Download GIFs from a single page:**
+
 ```bash
 python main.py https://example.com/gallery ".gif"
 ```
 
 **Crawl 3 levels deep, download all JPGs:**
+
 ```bash
 python main.py https://example.com ".jpg" --depth 3
 ```
 
 **Download PNGs, crawl max 50 pages:**
+
 ```bash
 python main.py https://example.com ".png" --depth 2 --max-pages 50
 ```
 
 **Download videos, allow external domains:**
+
 ```bash
 python main.py https://example.com ".mp4" --depth 2 --no-domain-restriction
 ```
 
 **Slower crawling (2 second delay):**
+
 ```bash
 python main.py https://example.com ".gif" --delay 2.0
 ```
@@ -91,16 +98,19 @@ python main.py https://example.com ".gif" --delay 2.0
 ### Advanced Examples
 
 **Deep crawl for images (depth 5, up to 500 pages):**
+
 ```bash
 python main.py https://example.com/gallery ".jpg" --depth 5 --max-pages 500
 ```
 
 **Fast crawl with no delay (use responsibly!):**
+
 ```bash
 python main.py https://example.com ".gif" --delay 0
 ```
 
 **Ignore robots.txt and crawl external links:**
+
 ```bash
 python main.py https://example.com ".png" --no-robots --no-domain-restriction
 ```
@@ -108,6 +118,7 @@ python main.py https://example.com ".png" --no-robots --no-domain-restriction
 ## Output Structure
 
 Downloaded files are organized as:
+
 ```
 output/
 └── <shortened_url>/
@@ -119,6 +130,7 @@ output/
 
 **Example:**
 Crawling `https://example.com/gallery` for `.gif` files saves to:
+
 ```
 output/example.com_gallery/gif/
 ```
@@ -143,16 +155,19 @@ output/example.com_gallery/gif/
 ## Tips & Best Practices
 
 ### 🚦 Be Respectful
+
 - Use appropriate delays (`--delay 1.0` or higher for large crawls)
 - Don't crawl the same site repeatedly in short periods
 - Respect robots.txt (don't use `--no-robots` unless you have permission)
 
 ### ⚡ Performance
+
 - Start with `--depth 0` to test on a single page first
 - Use `--max-pages` to limit crawl size
 - Lower delays for faster crawling, but be careful not to overload servers
 
 ### 🎯 Targeting
+
 - Use `--depth 0` for single-page downloads
 - Use `--depth 1-2` for small sites or specific sections
 - Use `--depth 3+` only if you need comprehensive coverage
@@ -161,6 +176,7 @@ output/example.com_gallery/gif/
 ## Deactivating Virtual Environment
 
 When you're done:
+
 ```bash
 deactivate
 ```
@@ -168,19 +184,22 @@ deactivate
 ## Troubleshooting
 
 **"No module named 'requests'"**
+
 - Make sure you activated the virtual environment
 - Run `pip install -r requirements.txt`
 
 **"Permission denied" or 403 errors**
+
 - Some sites block automated access
 - Try increasing `--delay` to 1-2 seconds
 - Check if robots.txt allows crawling
 
 **Too many files/pages**
+
 - Use `--max-pages` to limit the crawl
 - Use `--depth 0` or `--depth 1` for smaller crawls
 - Use `Ctrl+C` to stop the crawler at any time
 
 ## License
 
-Free to use for educational and personal projects. Be respectful of website terms of service and robots.txt.
+[AGPL-3.0 License](LICENSE)
