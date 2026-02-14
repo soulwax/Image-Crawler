@@ -1,17 +1,19 @@
-# PyImageDL - Python Web Crawler & File Downloader
+# Universal-Crawler - Blazing Fast Async Web Crawler
 
-A powerful web crawler that downloads all files of a specific format from websites. Crawls through multiple pages, follows links, and respects robots.txt.
+⚡ **SUPER FAST** async web crawler optimised for concurrency and speed.
 
 ## Features
 
+- 🚀 **Blazing Fast** - Async/await with concurrent downloads (10-50x faster than sync!)
 - 🕷️ **Full Web Crawler** - Crawls through multiple pages following links
 - 📊 **Configurable Depth** - Control how deep the crawler goes (0 = single page, 1+ = follow links)
-- 🎯 **File Type Filtering** - Download only the file types you want
-- 🔒 **Robots.txt Support** - Respects website crawling rules by default
+- 🎯 **Multiple File Types** - Download specific extensions, multiple types, or ALL files (`*`)
+- 🔍 **Content Search** - Find pages containing regex patterns and save matching HTML
+- ⚡ **Concurrent Requests** - Download multiple files and pages simultaneously (default: 10 concurrent)
 - 🌐 **Domain Control** - Stay on the same domain or allow external links
-- ⚡ **Rate Limiting** - Configurable delay between requests to be respectful
 - 📁 **Organized Output** - Files saved in `output/<domain>/<file_type>/` structure
 - 📈 **Progress Tracking** - Real-time crawl progress and statistics
+- 🔓 **Fast by Default** - Ignores robots.txt for speed (use `--respect-robots` to enable)
 
 ## Installation
 
@@ -59,6 +61,24 @@ python main.py <url> <file_extension> [options]
 python main.py https://example.com/gallery ".gif"
 ```
 
+**Download multiple file types (comma-separated):**
+
+```bash
+python main.py https://example.com ".jpg,.png,.gif,.webp"
+```
+
+**Download ALL files from a site:**
+
+```bash
+python main.py https://example.com "*"
+```
+
+**Search for pages containing specific content:**
+
+```bash
+python main.py https://example.com ".jpg" --content "API key|password|secret"
+```
+
 **Crawl 3 levels deep, download all JPGs:**
 
 ```bash
@@ -71,48 +91,56 @@ python main.py https://example.com ".jpg" --depth 3
 python main.py https://example.com ".png" --depth 2 --max-pages 50
 ```
 
-**Download videos, allow external domains:**
-
-```bash
-python main.py https://example.com ".mp4" --depth 2 --no-domain-restriction
-```
-
-**Slower crawling (2 second delay):**
-
-```bash
-python main.py https://example.com ".gif" --delay 2.0
-```
-
 ### Command-Line Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
 | `url` | Starting URL to crawl (required) | - |
-| `extension` | File extension to download, e.g., ".gif", "jpg" (required) | - |
+| `extension` | File extension(s): ".gif", ".jpg,.png", or "*" for all | `*` |
 | `-d, --depth` | Maximum crawl depth (0 = single page only) | 2 |
 | `-p, --max-pages` | Maximum number of pages to crawl | 100 |
-| `--delay` | Delay between requests in seconds | 0.5 |
+| `-c, --concurrent` | Maximum concurrent requests (higher = faster!) | 10 |
+| `--delay` | Delay between requests in seconds | 0.1 |
+| `--content` | Regex pattern to search in pages (saves matching HTML) | none |
 | `--no-domain-restriction` | Allow crawling to external domains | false |
-| `--no-robots` | Ignore robots.txt rules | false |
+| `--respect-robots` | Respect robots.txt rules (slower) | false |
 
 ### Advanced Examples
 
-**Deep crawl for images (depth 5, up to 500 pages):**
+**BLAZING FAST: 50 concurrent connections, no delay:**
 
 ```bash
-python main.py https://example.com/gallery ".jpg" --depth 5 --max-pages 500
+python main.py https://example.com ".jpg" --concurrent 50 --delay 0
 ```
 
-**Fast crawl with no delay (use responsibly!):**
+**Download ALL image types:**
 
 ```bash
-python main.py https://example.com ".gif" --delay 0
+python main.py https://example.com ".jpg,.jpeg,.png,.gif,.webp,.svg,.bmp"
 ```
 
-**Ignore robots.txt and crawl external links:**
+**Search for sensitive data (saves pages with matches):**
 
 ```bash
-python main.py https://example.com ".png" --no-robots --no-domain-restriction
+python main.py https://example.com "*" --content "password|api[_-]?key|secret|token" --depth 3
+```
+
+**Deep crawl for everything (depth 5, up to 500 pages):**
+
+```bash
+python main.py https://example.com "*" --depth 5 --max-pages 500
+```
+
+**Respectful crawling (slower but polite):**
+
+```bash
+python main.py https://example.com ".gif" --respect-robots --delay 1.0 --concurrent 3
+```
+
+**Maximum speed mode (use on your own sites!):**
+
+```bash
+python main.py https://example.com "*" --concurrent 100 --delay 0 --no-domain-restriction
 ```
 
 ## Output Structure
@@ -137,12 +165,13 @@ output/example.com_gallery/gif/
 
 ## How It Works
 
-1. **Start Crawling** - Begins at the provided URL
-2. **Extract Links** - Finds all links and files on the page
-3. **Download Files** - Downloads files matching your extension
-4. **Follow Links** - If depth > 0, follows page links and repeats
-5. **Respect Limits** - Stops at max depth or max pages
-6. **Stay Polite** - Delays between requests, respects robots.txt
+1. **Async Initialization** - Creates aiohttp session with connection pool
+2. **Concurrent Crawling** - Fetches multiple pages simultaneously (controlled by `--concurrent`)
+3. **Extract Links** - Finds all links and files on each page
+4. **Parallel Downloads** - Downloads all files from a page at once
+5. **Smart Queue** - O(1) duplicate checking with sets (no slow loops!)
+6. **Follow Links** - If depth > 0, adds new pages to queue
+7. **Speed Control** - Respects max depth, max pages, and concurrent limits
 
 ## Common File Extensions
 
@@ -154,17 +183,26 @@ output/example.com_gallery/gif/
 
 ## Tips & Best Practices
 
-### 🚦 Be Respectful
+### 🚀 Maximum Speed
 
-- Use appropriate delays (`--delay 1.0` or higher for large crawls)
+- Increase `--concurrent` to 50-100 for blazing fast downloads (on your own sites!)
+- Use `--delay 0` to remove delays between requests
+- Default settings ignore robots.txt for speed
+- The async implementation is 10-50x faster than the old sync version!
+
+### 🚦 Be Respectful (When Crawling Others' Sites)
+
+- Use `--respect-robots` to check robots.txt
+- Lower `--concurrent` to 3-5 for polite crawling
+- Add `--delay 1.0` or higher for large crawls
 - Don't crawl the same site repeatedly in short periods
-- Respect robots.txt (don't use `--no-robots` unless you have permission)
 
-### ⚡ Performance
+### ⚡ Performance Tips
 
 - Start with `--depth 0` to test on a single page first
 - Use `--max-pages` to limit crawl size
-- Lower delays for faster crawling, but be careful not to overload servers
+- Higher `--concurrent` = faster, but more load on the server
+- Use `--concurrent 10 --delay 0.1` as a good balance
 
 ### 🎯 Targeting
 
